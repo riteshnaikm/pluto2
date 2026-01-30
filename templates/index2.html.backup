@@ -1,0 +1,499 @@
+﻿{% extends 'base.html' %}
+
+{% block title %}HR Tools - Match Maker & Recruiter Handbook{% endblock %}
+
+{% block content %}
+<!-- Main Top-Level Tabs -->
+<div class="card">
+    <div class="card-header">
+        <ul class="nav nav-tabs card-header-tabs" id="mainAppTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="handbook-main-tab" data-bs-toggle="tab" 
+                        data-bs-target="#handbook-main" type="button" role="tab" 
+                        aria-controls="handbook-main" aria-selected="true">
+                    <i class="bi bi-book"></i> Recruiter Handbook
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="matchmaker-main-tab" data-bs-toggle="tab" 
+                        data-bs-target="#matchmaker-main" type="button" role="tab" 
+                        aria-controls="matchmaker-main" aria-selected="false">
+                    <i class="bi bi-clipboard-check"></i> Match Maker
+                </button>
+            </li>
+        </ul>
+    </div>
+    <div class="card-body">
+        <div class="tab-content" id="mainAppTabsContent">
+            <!-- Tab 1: Recruiter Handbook -->
+            <div class="tab-pane fade show active" id="handbook-main" role="tabpanel" aria-labelledby="handbook-main-tab">
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+                        <!-- Input Form for Handbook Generation -->
+                        <div id="handbook-input-section">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h4 class="mb-0">Generate Recruiter Handbook</h4>
+                                </div>
+                                <div class="card-body">
+                                    <form id="handbookGenerationForm">
+                                    <div class="mb-3">
+                                        <label for="oorwin_job_id" class="form-label">
+                                            🆔 Oorwin JobID 
+                                            <span class="text-muted">(Optional)</span>
+                                        </label>
+                                        <input type="text" class="form-control" id="oorwin_job_id" name="oorwin_job_id" 
+                                               placeholder="e.g. OOJ-4563, 4563" list="jobIdSuggestions">
+                                        <datalist id="jobIdSuggestions">
+                                            <!-- Auto-suggest options will be populated here -->
+                                        </datalist>
+                                        <small class="form-text text-muted">Enter a JobID to track all evaluations for this position together</small>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="resume" class="form-label">Upload Resume (PDF, DOCX)</label>
+                                        <input type="file" class="form-control" id="resume" name="resume" accept=".pdf,.docx" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="job_title" class="form-label">Job Title</label>
+                                        <input type="text" class="form-control" id="job_title" name="job_title" 
+                                               placeholder="e.g. Software Engineer, Data Scientist" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="job_description" class="form-label">Job Description</label>
+                                        <textarea class="form-control" id="job_description" name="job_description" rows="6" 
+                                                  placeholder="Paste the job description here..." required></textarea>
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                            <i class="bi bi-search"></i> Evaluate Resume
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+<div id="evaluation-result" style="display: none;" class="mb-4">
+    <div class="card evaluation-card">
+        <div class="card-header">
+            <h4 class="mb-0"><i class="bi bi-clipboard-data"></i> Evaluation Results</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Match Score Card -->
+                <div class="col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h4 class="mb-0">Match Score</h4>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="progress mb-3" style="height: 30px;">
+                                <div id="progress-bar" class="progress-bar" role="progressbar" 
+                                     style="width: 0%;" aria-valuenow="0" aria-valuemin="0" 
+                                     aria-valuemax="100">0%</div>
+                            </div>
+                            <span id="match-score" class="fs-3 fw-bold">0%</span>
+                            
+                            <!-- Score Breakdown -->
+                            <div class="mt-3">
+                                <button class="btn btn-outline-primary btn-sm" type="button" 
+                                        data-bs-toggle="collapse" data-bs-target="#scoreBreakdown">
+                                    View Score Breakdown
+                                </button>
+                                <div class="collapse mt-2" id="scoreBreakdown">
+                                    <div class="card card-body">
+                                        <div id="match-factors">
+                                            <div class="mb-2">
+                                                <label class="form-label mb-1">Skills Match</label>
+                                                <div class="progress" style="height: 8px;">
+                                                    <div id="skills-match" class="progress-bar" 
+                                                         role="progressbar" style="width: 0%;"></div>
+                                                </div>
+                                                <small class="text-muted" id="skills-match-score">0%</small>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label mb-1">Experience Match</label>
+                                                <div class="progress" style="height: 8px;">
+                                                    <div id="experience-match" class="progress-bar" 
+                                                         role="progressbar" style="width: 0%;"></div>
+                                                </div>
+                                                <small class="text-muted" id="experience-match-score">0%</small>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label mb-1">Education Match</label>
+                                                <div class="progress" style="height: 8px;">
+                                                    <div id="education-match" class="progress-bar" 
+                                                         role="progressbar" style="width: 0%;"></div>
+                                                </div>
+                                                <small class="text-muted" id="education-match-score">0%</small>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label mb-1">Industry Knowledge</label>
+                                                <div class="progress" style="height: 8px;">
+                                                    <div id="industry-match" class="progress-bar" 
+                                                         role="progressbar" style="width: 0%;"></div>
+                                                </div>
+                                                <small class="text-muted" id="industry-match-score">0%</small>
+                                            </div>
+                                            <div class="mb-2">
+                                                <label class="form-label mb-1">Certification Match</label>
+                                                <div class="progress" style="height: 8px;">
+                                                    <div id="certification-match" class="progress-bar" 
+                                                         role="progressbar" style="width: 0%;"></div>
+                                                </div>
+                                                <small class="text-muted" id="certification-match-score">0%</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Job Stability Card -->
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h4 class="mb-0">Job Stability</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-2">
+                                <span class="me-2">Stability Score:</span>
+                                <div class="progress flex-grow-1" style="height: 8px;">
+                                    <div id="stability-score-bar" class="progress-bar" role="progressbar" 
+                                         style="width: 0%;" aria-valuenow="0" aria-valuemin="0" 
+                                         aria-valuemax="100"></div>
+                                </div>
+                                <span class="ms-2" id="stability-score">0</span>
+                            </div>
+                            <p><strong>Risk Level: </strong><span id="risk-level" class="badge">Unknown</span></p>
+                            <p><strong>Average Tenure: </strong><span id="average-tenure">Unknown</span></p>
+                            <p><strong>Job Count: </strong><span id="job-count">0</span></p>
+                            <div id="stability-explanation" class="alert alert-light mt-2">No stability data available</div>
+                        </div>
+                    </div>
+
+                    <!-- Career Progression Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0">Career Progression Analysis</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <span class="me-2">Progression Score:</span>
+                                <div class="progress flex-grow-1" style="height: 8px;">
+                                    <div id="progression-score-bar" class="progress-bar" role="progressbar" 
+                                         style="width: 0%;" aria-valuenow="0" aria-valuemin="0" 
+                                         aria-valuemax="100">0%</div>
+                                </div>
+                                <span class="ms-2" id="progression-score">0</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Key Observations</h5>
+                                <ul id="key-observations" class="list-group"></ul>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Career Path</h5>
+                                <div id="career-path" class="table-responsive">
+                                    <table class="table table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>Company</th>
+                                                <th>Duration</th>
+                                                <th>Level</th>
+                                                <th>Progression</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="career-path-body"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Red Flags</h5>
+                                <div id="red-flags" class="alert alert-warning"></div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <h5>Analysis Reasoning</h5>
+                                <p id="progression-reasoning" class="text-muted"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-8">
+                    <div class="card mb-3">
+                        <div class="card-header">
+                            <h4 class="mb-0">Profile Summary</h4>
+                        </div>
+                        <div class="card-body">
+                            <p id="profile-summary" class="border p-3 rounded bg-light"></p>
+                            
+                            <h5 class="mt-4">Missing Keywords</h5>
+                            <div id="missing-keywords" class="p-3 border rounded bg-light d-flex flex-wrap gap-2"></div>
+                            
+                            <h5 class="mt-4">Additional Information</h5>
+                            <div id="extra-info" class="p-3 border rounded bg-light"></div>
+                        </div>
+                    </div>
+
+                    <!-- Interview Questions -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="mb-0">Essential Candidate Questions</h4>
+                        </div>
+                        <div class="card-body">
+                            <ul class="nav nav-tabs" id="questionsTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="quick-checks-tab" data-bs-toggle="tab" 
+                                            data-bs-target="#quick-checks" type="button" role="tab" 
+                                            aria-controls="quick-checks" aria-selected="true">Quick Checks</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="soft-skills-tab" data-bs-toggle="tab" 
+                                            data-bs-target="#soft-skills" type="button" role="tab" 
+                                            aria-controls="soft-skills" aria-selected="false">Soft Skills</button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="technical-skills-tab" data-bs-toggle="tab" 
+                                            data-bs-target="#technical-skills" type="button" role="tab" 
+                                            aria-controls="technical-skills" aria-selected="false">Skill Checks</button>
+                                </li>
+                            </ul>
+                            <div class="tab-content mt-3" id="questionsTabContent">
+                                <div class="tab-pane fade show active" id="quick-checks" role="tabpanel" 
+                                     aria-labelledby="quick-checks-tab">
+                                    <ul id="quick-checks-questions" class="list-group"></ul>
+                                </div>
+                                <div class="tab-pane fade" id="soft-skills" role="tabpanel" 
+                                     aria-labelledby="soft-skills-tab">
+                                    <ul id="soft-skills-questions" class="list-group"></ul>
+                                </div>
+                                <div class="tab-pane fade" id="technical-skills" role="tabpanel" 
+                                     aria-labelledby="technical-skills-tab">
+                                    <ul id="technical-skills-questions" class="list-group"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Feedback Section -->
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h4 class="mb-0">Provide Feedback</h4>
+                        </div>
+                        <div class="card-body">
+                            <form id="feedbackForm">
+                                <input type="hidden" id="evaluation-id" name="evaluation_id">
+                                <div class="mb-3">
+                                    <label for="rating" class="form-label">Rating (1-5)</label>
+                                    <div class="star-rating" id="star-rating">
+                                        <span class="star" data-value="1">â˜…</span>
+                                        <span class="star" data-value="2">â˜…</span>
+                                        <span class="star" data-value="3">â˜…</span>
+                                        <span class="star" data-value="4">â˜…</span>
+                                        <span class="star" data-value="5">â˜…</span>
+                                    </div>
+                                    <input type="hidden" id="rating" name="rating" value="0">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="comments" class="form-label">Comments</label>
+                                    <textarea class="form-control" id="comments" name="comments" rows="3" 
+                                              placeholder="Your feedback..."></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Submit Feedback</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+            </div>
+            <!-- End Match Maker Tab -->
+            
+            <!-- Tab 2: Match Maker -->
+            <div class="tab-pane fade" id="matchmaker-main" role="tabpanel" aria-labelledby="matchmaker-main-tab">
+                <div class="row justify-content-center">
+                    <div class="col-md-10">
+                        <!-- Input Form for Handbook Generation -->
+                        <div id="handbook-input-section">
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h4 class="mb-0">Generate Recruiter Handbook</h4>
+                                </div>
+                                <div class="card-body">
+                                    <form id="handbookGenerationForm">
+                                        <div class="mb-3">
+                                            <label for="handbook_oorwin_job_id" class="form-label">
+                                                🆔 Oorwin JobID 
+                                                <span class="text-muted">(Optional)</span>
+                                            </label>
+                                            <input type="text" class="form-control" id="handbook_oorwin_job_id" name="oorwin_job_id" 
+                                                   placeholder="e.g. OOJ-4563, 4563" list="handbookJobIdSuggestions">
+                                            <datalist id="handbookJobIdSuggestions">
+                                                <!-- Auto-suggest options will be populated here -->
+                                            </datalist>
+                                            <small class="form-text text-muted">Enter an existing JobID to auto-fill job description, or enter a new one</small>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="handbook_job_description" class="form-label">Job Description <span class="text-danger">*</span></label>
+                                            <textarea class="form-control" id="handbook_job_description" name="job_description" rows="8" 
+                                                      placeholder="Paste the complete job description here..." required></textarea>
+                                            <small class="form-text text-muted">Include role responsibilities, requirements, qualifications, and any other relevant details.</small>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="handbook_additional_context" class="form-label">Additional Context (Optional)</label>
+                                            <textarea class="form-control" id="handbook_additional_context" name="additional_context" rows="4" 
+                                                      placeholder="Add any additional context, company information, or specific instructions..."></textarea>
+                                            <small class="form-text text-muted">E.g., company culture, team structure, growth opportunities, specific skills to prioritize, etc.</small>
+                                        </div>
+                                        <div class="text-center">
+                                            <button type="submit" class="btn btn-primary btn-lg" id="generateHandbookBtn">
+                                                <i class="bi bi-book"></i> Generate Recruiter Handbook
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Loading State -->
+                        <div id="handbook-loading" class="text-center py-5" style="display: none;">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="mt-3">Generating comprehensive recruiter playbook & handbook...</p>
+                            <small class="text-muted">This may take 30-60 seconds</small>
+                        </div>
+
+                        <!-- Generated Handbook Content -->
+                        <div id="handbook-result-section" style="display: none;">
+                            <div class="card">
+                                <div class="card-header d-flex justify-content-between align-items-center">
+                                    <h4 class="mb-0">Generated Recruiter Handbook</h4>
+                                    <div>
+                                        <button class="btn btn-success btn-sm me-2" id="downloadHandbookPDF">
+                                            <i class="bi bi-download"></i> Download PDF
+                                        </button>
+                                        <button class="btn btn-secondary btn-sm" id="resetHandbookForm">
+                                            <i class="bi bi-arrow-left"></i> Generate New
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div id="handbook-content" class="recruiter-handbook-content">
+                                        <!-- Handbook markdown will be rendered here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Error State -->
+                        <div id="handbook-error" style="display: none;" class="alert alert-danger">
+                            <strong>Error:</strong> <span id="handbook-error-message">Failed to generate recruiter handbook. Please try again.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Recruiter Handbook Tab -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Marked.js for Markdown rendering -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- DOMPurify for sanitizing HTML -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script>
+<!-- Custom Resume Evaluator Script -->
+<script src="{{ url_for('static', filename='js/resume-evaluator.js') }}"></script>
+<style>
+/* Main Top-Level Tabs Styling */
+#mainAppTabs .nav-link {
+    font-size: 1.1rem;
+    font-weight: 500;
+    padding: 12px 24px;
+    color: #2c3e50 !important;
+}
+
+#mainAppTabs .nav-link:hover {
+    background-color: #f8f9fa;
+}
+
+#mainAppTabs .nav-link.active {
+    background-color: #fff;
+    border-bottom: 3px solid #3498db;
+    color: #3498db !important;
+}
+
+#mainAppTabs .nav-link i {
+    margin-right: 8px;
+}
+
+/* Recruiter Handbook Styling */
+.recruiter-handbook-content {
+    padding: 20px;
+    max-width: 100%;
+}
+
+.recruiter-handbook-content h1,
+.recruiter-handbook-content h2,
+.recruiter-handbook-content h3,
+.recruiter-handbook-content h4 {
+    color: var(--primary-blue);
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.recruiter-handbook-content table {
+    width: 100%;
+    margin: 1rem 0;
+}
+
+.recruiter-handbook-content table th {
+    background-color: var(--primary-blue);
+    color: white;
+    padding: 0.75rem;
+}
+
+.recruiter-handbook-content table td {
+    padding: 0.5rem;
+    border: 1px solid #ddd;
+}
+
+.recruiter-handbook-content ul,
+.recruiter-handbook-content ol {
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.recruiter-handbook-content blockquote {
+    border-left: 4px solid var(--primary-blue);
+    padding-left: 1rem;
+    margin: 1rem 0;
+    font-style: italic;
+}
+
+.recruiter-handbook-content code {
+    background-color: #f4f4f4;
+    padding: 0.2rem 0.4rem;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+.recruiter-handbook-content pre {
+    background-color: #f4f4f4;
+    padding: 1rem;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+</style>
+
+{% endblock %}

@@ -1,0 +1,910 @@
+{% extends "base2.html" %}
+
+{% block title %}Feedback History - HR Assistant Suite{% endblock %}
+
+{% block head %}
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<!-- DataTables CSS -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+<link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.5.0/css/responsive.bootstrap5.min.css">
+
+<style>
+    /* Summary Cards */
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    
+    .stats-card.green {
+        background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    }
+    
+    .stats-card.orange {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    }
+    
+    .stats-card.blue {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    }
+    
+    .stats-value {
+        font-size: 2.5rem;
+        font-weight: bold;
+        margin: 10px 0;
+    }
+    
+    .stats-label {
+        font-size: 0.9rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    /* Filter Controls */
+    .filter-section {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+    
+    .filter-controls {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        align-items: center;
+    }
+    
+    .filter-controls select {
+        min-width: 200px;
+    }
+    
+    /* Star Ratings */
+    .star-rating {
+        color: #ffc107;
+        font-size: 1.1rem;
+        white-space: nowrap;
+    }
+    
+    .star-rating.rating-low {
+        color: #dc3545;
+    }
+    
+    .star-rating.rating-medium {
+        color: #ffc107;
+    }
+    
+    .star-rating.rating-high {
+        color: #28a745;
+    }
+    
+    /* Match Percentage Badge */
+    .match-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+    }
+    
+    .match-high {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .match-medium {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .match-low {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    /* Expandable content */
+    .expandable-content {
+        max-width: 300px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .expandable-content:hover {
+        text-decoration: underline;
+        color: #007bff;
+    }
+    
+    .expandable-content.expanded {
+        white-space: normal;
+        max-width: none;
+    }
+    
+    /* Action Buttons */
+    .btn-view-details {
+        padding: 5px 10px;
+        font-size: 0.85rem;
+        border-radius: 5px;
+    }
+    
+    /* DataTables Customization */
+    .dataTables_wrapper .dataTables_filter input {
+        border-radius: 20px;
+        padding: 5px 15px;
+    }
+    
+    .dataTables_wrapper .dataTables_length select {
+        border-radius: 5px;
+    }
+    
+    table.dataTable tbody tr:hover {
+        background-color: #f8f9fa !important;
+    }
+    
+    /* Modal Styling */
+    .modal-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+    
+    .modal-body {
+        max-height: 70vh;
+        overflow-y: auto;
+    }
+    
+    /* Tabs */
+    .nav-tabs .nav-link {
+        color: #6c757d;
+        font-weight: 500;
+        border: none;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s ease;
+    }
+    
+    .nav-tabs .nav-link:hover {
+        border-color: #dee2e6;
+        color: #495057;
+    }
+    
+    .nav-tabs .nav-link.active {
+        color: #667eea;
+        border-color: #667eea;
+        background: transparent;
+    }
+    
+    .badge {
+        padding: 5px 10px;
+        font-size: 0.8rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .filter-controls {
+            flex-direction: column;
+        }
+        
+        .filter-controls select {
+            width: 100%;
+        }
+        
+        .stats-value {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <h2 class="mb-4"><i class="bi bi-chat-square-text-fill"></i> Feedback History</h2>
+    
+    <!-- Summary Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="stats-card">
+                <div class="stats-label">Total Feedback</div>
+                <div class="stats-value" id="total-feedback">0</div>
+                <small><i class="bi bi-graph-up"></i> All time</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card green">
+                <div class="stats-label">Average Rating</div>
+                <div class="stats-value" id="avg-rating">0.0</div>
+                <small><i class="bi bi-star-fill"></i> Out of 5.0</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card orange">
+                <div class="stats-label">This Week</div>
+                <div class="stats-value" id="week-feedback">0</div>
+                <small><i class="bi bi-calendar-week"></i> Last 7 days</small>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="stats-card blue">
+                <div class="stats-label">Today</div>
+                <div class="stats-value" id="today-feedback">0</div>
+                <small><i class="bi bi-calendar-day"></i> Past 24 hours</small>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabbed Interface -->
+    <ul class="nav nav-tabs mb-3" id="feedbackTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="hr-assistant-tab" data-bs-toggle="tab" data-bs-target="#hr-assistant-feedback" type="button" role="tab">
+                <i class="bi bi-chat-dots"></i> HR Assistant <span class="badge bg-primary" id="hr-count">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="handbooks-tab" data-bs-toggle="tab" data-bs-target="#handbooks-feedback" type="button" role="tab">
+                <i class="bi bi-book"></i> Recruiter Handbooks <span class="badge bg-success" id="handbook-count">0</span>
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="evaluations-tab" data-bs-toggle="tab" data-bs-target="#evaluations-feedback" type="button" role="tab">
+                <i class="bi bi-file-earmark-person"></i> Resume Evaluations <span class="badge bg-info" id="eval-count">0</span>
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="feedbackTabContent">
+        <!-- HR Assistant Tab -->
+        <div class="tab-pane fade show active" id="hr-assistant-feedback" role="tabpanel">
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-controls">
+                    <div>
+                        <label class="form-label mb-1"><i class="bi bi-funnel"></i> Filters:</label>
+                    </div>
+                    <select class="form-select" id="hr-rating-filter">
+                        <option value="">All Ratings</option>
+                        <option value="5">⭐⭐⭐⭐⭐ (5 stars)</option>
+                        <option value="4">⭐⭐⭐⭐ (4 stars)</option>
+                        <option value="3">⭐⭐⭐ (3 stars)</option>
+                        <option value="2">⭐⭐ (2 stars)</option>
+                        <option value="1">⭐ (1 star)</option>
+                    </select>
+                    <select class="form-select" id="hr-date-filter">
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">Last 7 Days</option>
+                        <option value="month">Last 30 Days</option>
+                        <option value="quarter">Last 3 Months</option>
+                    </select>
+                    <button class="btn btn-outline-secondary" id="hr-clear-filters">
+                        <i class="bi bi-x-circle"></i> Clear Filters
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" id="hrTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Question</th>
+                            <th>Answer</th>
+                            <th>Rating</th>
+                            <th>Feedback</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Recruiter Handbooks Tab -->
+        <div class="tab-pane fade" id="handbooks-feedback" role="tabpanel">
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-controls">
+                    <div>
+                        <label class="form-label mb-1"><i class="bi bi-funnel"></i> Filters:</label>
+                    </div>
+                    <select class="form-select" id="handbook-rating-filter">
+                        <option value="">All Ratings</option>
+                        <option value="5">⭐⭐⭐⭐⭐ (5 stars)</option>
+                        <option value="4">⭐⭐⭐⭐ (4 stars)</option>
+                        <option value="3">⭐⭐⭐ (3 stars)</option>
+                        <option value="2">⭐⭐ (2 stars)</option>
+                        <option value="1">⭐ (1 star)</option>
+                    </select>
+                    <select class="form-select" id="handbook-date-filter">
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">Last 7 Days</option>
+                        <option value="month">Last 30 Days</option>
+                        <option value="quarter">Last 3 Months</option>
+                    </select>
+                    <button class="btn btn-outline-secondary" id="handbook-clear-filters">
+                        <i class="bi bi-x-circle"></i> Clear Filters
+                    </button>
+                </div>
+    </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" id="handbooksTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Job ID</th>
+                            <th>Job Title</th>
+                            <th>Rating</th>
+                            <th>Comments</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Resume Evaluations Tab -->
+        <div class="tab-pane fade" id="evaluations-feedback" role="tabpanel">
+            <!-- Filter Section -->
+            <div class="filter-section">
+                <div class="filter-controls">
+                    <div>
+                        <label class="form-label mb-1"><i class="bi bi-funnel"></i> Filters:</label>
+                    </div>
+                    <select class="form-select" id="eval-rating-filter">
+                        <option value="">All Ratings</option>
+                        <option value="5">⭐⭐⭐⭐⭐ (5 stars)</option>
+                        <option value="4">⭐⭐⭐⭐ (4 stars)</option>
+                        <option value="3">⭐⭐⭐ (3 stars)</option>
+                        <option value="2">⭐⭐ (2 stars)</option>
+                        <option value="1">⭐ (1 star)</option>
+                    </select>
+                    <select class="form-select" id="eval-date-filter">
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">Last 7 Days</option>
+                        <option value="month">Last 30 Days</option>
+                        <option value="quarter">Last 3 Months</option>
+                    </select>
+                    <button class="btn btn-outline-secondary" id="eval-clear-filters">
+                        <i class="bi bi-x-circle"></i> Clear Filters
+                    </button>
+                </div>
+            </div>
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover" id="evaluationsTable">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Job ID</th>
+                            <th>Job Title</th>
+                            <th>Resume Name</th>
+                            <th>Match %</th>
+                            <th>Rating</th>
+                            <th>Comments</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Actions</th>
+                            </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Full Q&A View -->
+<div class="modal fade" id="qaModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-chat-dots"></i> Full Q&A Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6 class="text-primary">Question:</h6>
+                <p id="modal-question" class="border-start border-primary border-3 ps-3 mb-3"></p>
+                <h6 class="text-success">Answer:</h6>
+                <div id="modal-answer" class="border-start border-success border-3 ps-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Handbook View -->
+<div class="modal fade" id="handbookModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-book"></i> <span id="handbook-modal-title"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="handbook-modal-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Evaluation Report -->
+<div class="modal fade" id="evaluationModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-person"></i> <span id="eval-modal-title"></span></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="eval-modal-content"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/dataTables.responsive.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.5.0/js/responsive.bootstrap5.min.js"></script>
+
+<!-- Marked.js for Markdown Rendering -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+<script>
+let allData = {
+    hr_assistant: [],
+    handbooks: [],
+    evaluations: []
+};
+
+let dataTables = {
+    hr: null,
+    handbooks: null,
+    evaluations: null
+};
+
+// Initialize on page load
+    $(document).ready(function() {
+    fetchAllFeedback();
+    setupFilterListeners();
+});
+
+// Fetch all feedback data
+async function fetchAllFeedback() {
+    try {
+        console.log('Fetching feedback data...');
+        const response = await fetch('/api/feedback/all');
+        const data = await response.json();
+        
+        console.log('API Response:', data);
+        
+        if (data.success) {
+            allData = {
+                hr_assistant: data.hr_assistant || [],
+                handbooks: data.handbooks || [],
+                evaluations: data.evaluations || []
+            };
+            
+            console.log('Data loaded:', {
+                hr_count: allData.hr_assistant.length,
+                handbook_count: allData.handbooks.length,
+                eval_count: allData.evaluations.length
+            });
+            
+            updateSummaryStats();
+            updateTabCounts();
+            initializeDataTables();
+        } else {
+            console.error('Error fetching feedback:', data.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+    }
+}
+
+// Update summary statistics
+function updateSummaryStats() {
+    const allFeedback = [
+        ...allData.hr_assistant,
+        ...allData.handbooks,
+        ...allData.evaluations
+    ];
+    
+    // Total feedback
+    document.getElementById('total-feedback').textContent = allFeedback.length;
+    
+    // Average rating
+    if (allFeedback.length > 0) {
+        const avgRating = allFeedback.reduce((sum, item) => sum + item.rating, 0) / allFeedback.length;
+        document.getElementById('avg-rating').textContent = avgRating.toFixed(1);
+    }
+    
+    // This week (last 7 days)
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    const weekCount = allFeedback.filter(item => new Date(item.timestamp) >= weekAgo).length;
+    document.getElementById('week-feedback').textContent = weekCount;
+    
+    // Today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayCount = allFeedback.filter(item => new Date(item.timestamp) >= today).length;
+    document.getElementById('today-feedback').textContent = todayCount;
+}
+
+// Update tab counts
+function updateTabCounts() {
+    document.getElementById('hr-count').textContent = allData.hr_assistant.length;
+    document.getElementById('handbook-count').textContent = allData.handbooks.length;
+    document.getElementById('eval-count').textContent = allData.evaluations.length;
+}
+
+// Helper: Generate star rating HTML
+function getStarRating(rating) {
+    const fullStars = '★'.repeat(rating);
+    const emptyStars = '☆'.repeat(5 - rating);
+    let ratingClass = 'rating-medium';
+    if (rating >= 4) ratingClass = 'rating-high';
+    else if (rating <= 2) ratingClass = 'rating-low';
+    
+    return `<span class="star-rating ${ratingClass}">${fullStars}${emptyStars}</span>`;
+}
+
+// Helper: Format date
+function parseUtcTimestamp(ts) {
+    if (!ts) return new Date();
+    // Normalize 'YYYY-MM-DD HH:MM:SS' (SQLite) to UTC by appending 'Z'
+    // Also handle already ISO strings
+    const iso = ts.includes('T') ? ts : ts.replace(' ', 'T');
+    return new Date(iso + 'Z');
+}
+
+function formatDate(timestamp) {
+    const date = parseUtcTimestamp(timestamp);
+    return date.toLocaleDateString('en-US', {
+        month: 'short', day: 'numeric', year: 'numeric',
+        timeZone: 'Asia/Kolkata'
+    });
+}
+
+// Helper: Format time
+function formatTime(timestamp) {
+    const date = parseUtcTimestamp(timestamp);
+    return date.toLocaleTimeString('en-US', {
+        hour: '2-digit', minute: '2-digit', hour12: true,
+        timeZone: 'Asia/Kolkata'
+    });
+}
+
+// Helper: Truncate text
+function truncateText(text, maxLength) {
+    if (!text) return 'N/A';
+    if (text.length <= maxLength) return text;
+    return text.substring(0, maxLength) + '...';
+}
+
+// Helper: Get match percentage badge
+function getMatchBadge(percentage) {
+    let badgeClass = 'match-medium';
+    if (percentage >= 80) badgeClass = 'match-high';
+    else if (percentage < 60) badgeClass = 'match-low';
+    
+    return `<span class="match-badge ${badgeClass}">${percentage}%</span>`;
+}
+
+// Initialize DataTables
+function initializeDataTables() {
+    // HR Assistant Table
+    dataTables.hr = $('#hrTable').DataTable({
+        data: allData.hr_assistant,
+        columns: [
+            { 
+                data: 'question',
+                render: (data) => `<span class="expandable-content" title="${data}">${truncateText(data, 50)}</span>`
+            },
+            { 
+                data: 'answer',
+                render: (data) => `<span class="expandable-content" title="Click to view full answer">${truncateText(data, 100)}</span>`
+            },
+            { 
+                data: 'rating',
+                render: (data) => getStarRating(data)
+            },
+            { 
+                data: 'feedback',
+                render: (data) => data || '<em class="text-muted">No feedback</em>'
+            },
+            { 
+                data: 'timestamp',
+                render: (data) => formatDate(data)
+            },
+            { 
+                data: 'timestamp',
+                render: (data) => formatTime(data)
+            },
+            {
+                data: null,
+                render: (data, type, row) => `
+                    <button class="btn btn-sm btn-primary btn-view-details" onclick="viewQA(${row.id})">
+                        <i class="bi bi-eye"></i> View Full
+                    </button>
+                `
+            }
+        ],
+        order: [[4, 'desc'], [5, 'desc']],
+        pageLength: 10,
+        responsive: true,
+        language: {
+            emptyTable: "No feedback received yet for HR Assistant questions"
+        }
+    });
+    
+    // Recruiter Handbooks Table
+    dataTables.handbooks = $('#handbooksTable').DataTable({
+        data: allData.handbooks,
+        columns: [
+            { 
+                data: 'oorwin_job_id',
+                render: (data) => data || '<em class="text-muted">N/A</em>'
+            },
+            { data: 'job_title' },
+            { 
+                data: 'rating',
+                render: (data) => getStarRating(data)
+            },
+            { 
+                data: 'comments',
+                render: (data) => data || '<em class="text-muted">No comments</em>'
+            },
+            { 
+                data: 'timestamp',
+                render: (data) => formatDate(data)
+            },
+            { 
+                data: 'timestamp',
+                render: (data) => formatTime(data)
+            },
+            {
+                data: null,
+                render: (data, type, row) => `
+                    <button class="btn btn-sm btn-success btn-view-details" onclick="viewHandbook(${row.handbook_id})">
+                        <i class="bi bi-book"></i> View Handbook
+                    </button>
+                `
+            }
+        ],
+        order: [[4, 'desc'], [5, 'desc']],
+        pageLength: 10,
+        responsive: true,
+        language: {
+            emptyTable: "No feedback received yet for Recruiter Handbooks"
+        }
+    });
+    
+    // Resume Evaluations Table
+    dataTables.evaluations = $('#evaluationsTable').DataTable({
+        data: allData.evaluations,
+        columns: [
+            { 
+                data: 'oorwin_job_id',
+                render: (data) => data || '<em class="text-muted">N/A</em>'
+            },
+            { data: 'job_title' },
+            { 
+                data: 'filename',
+                render: (data) => `<span title="${data}">${truncateText(data, 20)}</span>`
+            },
+            { 
+                data: 'match_percentage',
+                render: (data) => getMatchBadge(data)
+            },
+            { 
+                data: 'rating',
+                render: (data) => getStarRating(data)
+            },
+            { 
+                data: 'comments',
+                render: (data) => data || '<em class="text-muted">No comments</em>'
+            },
+            { 
+                data: 'timestamp',
+                render: (data) => formatDate(data)
+            },
+            { 
+                data: 'timestamp',
+                render: (data) => formatTime(data)
+            },
+            {
+                data: null,
+                render: (data, type, row) => `
+                    <button class="btn btn-sm btn-info btn-view-details" onclick="viewEvaluation(${row.evaluation_id})">
+                        <i class="bi bi-file-earmark-text"></i> View Report
+                    </button>
+                `
+            }
+        ],
+        order: [[6, 'desc'], [7, 'desc']],
+        pageLength: 10,
+        responsive: true,
+        language: {
+            emptyTable: "No feedback received yet for Resume Evaluations"
+        }
+    });
+}
+
+// Setup filter listeners
+function setupFilterListeners() {
+    // HR Assistant filters
+    $('#hr-rating-filter, #hr-date-filter').on('change', function() {
+        filterTable('hr');
+    });
+    
+    $('#hr-clear-filters').on('click', function() {
+        $('#hr-rating-filter, #hr-date-filter').val('');
+        filterTable('hr');
+    });
+    
+    // Handbooks filters
+    $('#handbook-rating-filter, #handbook-date-filter').on('change', function() {
+        filterTable('handbooks');
+    });
+    
+    $('#handbook-clear-filters').on('click', function() {
+        $('#handbook-rating-filter, #handbook-date-filter').val('');
+        filterTable('handbooks');
+    });
+    
+    // Evaluations filters
+    $('#eval-rating-filter, #eval-date-filter').on('change', function() {
+        filterTable('evaluations');
+    });
+    
+    $('#eval-clear-filters').on('click', function() {
+        $('#eval-rating-filter, #eval-date-filter').val('');
+        filterTable('evaluations');
+    });
+}
+
+// Filter table based on selected filters
+function filterTable(type) {
+    let table, ratingFilter, dateFilter, dataKey;
+    
+    if (type === 'hr') {
+        table = dataTables.hr;
+        ratingFilter = $('#hr-rating-filter').val();
+        dateFilter = $('#hr-date-filter').val();
+        dataKey = 'hr_assistant';
+    } else if (type === 'handbooks') {
+        table = dataTables.handbooks;
+        ratingFilter = $('#handbook-rating-filter').val();
+        dateFilter = $('#handbook-date-filter').val();
+        dataKey = 'handbooks';
+    } else {
+        table = dataTables.evaluations;
+        ratingFilter = $('#eval-rating-filter').val();
+        dateFilter = $('#eval-date-filter').val();
+        dataKey = 'evaluations';
+    }
+    
+    // Filter data
+    let filteredData = allData[dataKey].filter(item => {
+        // Rating filter
+        if (ratingFilter && item.rating != ratingFilter) return false;
+        
+        // Date filter
+        if (dateFilter) {
+            const itemDate = new Date(item.timestamp);
+            const now = new Date();
+            
+            if (dateFilter === 'today') {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                if (itemDate < today) return false;
+            } else if (dateFilter === 'week') {
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                if (itemDate < weekAgo) return false;
+            } else if (dateFilter === 'month') {
+                const monthAgo = new Date();
+                monthAgo.setDate(monthAgo.getDate() - 30);
+                if (itemDate < monthAgo) return false;
+            } else if (dateFilter === 'quarter') {
+                const quarterAgo = new Date();
+                quarterAgo.setDate(quarterAgo.getDate() - 90);
+                if (itemDate < quarterAgo) return false;
+            }
+        }
+        
+        return true;
+    });
+    
+    // Update table
+    table.clear().rows.add(filteredData).draw();
+}
+
+// View Q&A Details
+function viewQA(id) {
+    const item = allData.hr_assistant.find(qa => qa.id === id);
+    if (item) {
+        document.getElementById('modal-question').textContent = item.question;
+        document.getElementById('modal-answer').innerHTML = marked.parse(item.answer || 'No answer available');
+        new bootstrap.Modal(document.getElementById('qaModal')).show();
+    }
+}
+
+// View Handbook
+function viewHandbook(handbookId) {
+    const item = allData.handbooks.find(h => h.handbook_id === handbookId);
+    if (item) {
+        document.getElementById('handbook-modal-title').textContent = item.job_title;
+        document.getElementById('handbook-modal-content').innerHTML = marked.parse(item.markdown_content || 'No content available');
+        new bootstrap.Modal(document.getElementById('handbookModal')).show();
+    }
+}
+
+// View Evaluation Report
+function viewEvaluation(evaluationId) {
+    const item = allData.evaluations.find(e => e.evaluation_id === evaluationId);
+    if (item) {
+        document.getElementById('eval-modal-title').textContent = `${item.filename} - ${item.job_title}`;
+        
+        // Build comprehensive evaluation report
+        let content = `
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <strong>Match Percentage:</strong> ${getMatchBadge(item.match_percentage)}
+                </div>
+                <div class="col-md-6">
+                    <strong>Job ID:</strong> ${item.oorwin_job_id || 'N/A'}
+                </div>
+            </div>
+            
+            <h6 class="text-primary mt-4">Profile Summary:</h6>
+            <div class="border-start border-primary border-3 ps-3 mb-3">
+                ${marked.parse(item.profile_summary || 'Not available')}
+            </div>
+            
+            <h6 class="text-success mt-4">Match Factors:</h6>
+            <div class="border-start border-success border-3 ps-3 mb-3">
+                ${marked.parse(item.match_factors || 'Not available')}
+            </div>
+            
+            <h6 class="text-warning mt-4">Missing Keywords:</h6>
+            <div class="border-start border-warning border-3 ps-3 mb-3">
+                ${marked.parse(item.missing_keywords || 'Not available')}
+            </div>
+            
+            <h6 class="text-info mt-4">Job Stability:</h6>
+            <div class="border-start border-info border-3 ps-3 mb-3">
+                ${marked.parse(item.job_stability || 'Not available')}
+            </div>
+            
+            <h6 class="text-secondary mt-4">Career Progression:</h6>
+            <div class="border-start border-secondary border-3 ps-3 mb-3">
+                ${marked.parse(item.career_progression || 'Not available')}
+            </div>
+        `;
+        
+        document.getElementById('eval-modal-content').innerHTML = content;
+        new bootstrap.Modal(document.getElementById('evaluationModal')).show();
+    }
+}
+</script>
+{% endblock %} 

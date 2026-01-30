@@ -1,0 +1,49 @@
+# Core ML + Vector DB + LLM Tooling
+langchain
+langchain-community
+langchain-core
+langchain-text-splitters
+langchain-groq
+langchain-pinecone
+groq
+pinecone
+openai
+
+# Embeddings/Vector Search
+sentence-transformers
+torch
+
+# Web Framework
+Flask
+flask-cors
+hypercorn
+
+# Data Handling
+pandas
+numpy
+scikit-learn
+nltk
+
+# PDF Parsing
+pdfplumber
+pymupdf
+pytesseract
+pillow
+
+# Environment Variables
+python-dotenv
+
+fsspec
+protobuf
+tqdm
+requests
+
+rank_bm25
+google.generativeai
+python-docx
+langchain-huggingface
+asgiref
+reportlab
+markdown
+tabulate
+authlib

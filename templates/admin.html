@@ -1,0 +1,194 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Panel - HR Assistant{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class="bi bi-gear"></i> Admin Panel</h2>
+        <button class="btn btn-primary" onclick="refreshUsers()">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+        </button>
+    </div>
+
+    <!-- User Management Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="bi bi-people"></i> User Management</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="users-table">
+                    <thead>
+                        <tr>
+                            <th>Email</th>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Team</th>
+                            <th>Manager</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody">
+                        <tr>
+                            <td colspan="7" class="text-center">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="edit-user-form">
+                    <input type="hidden" id="edit-email" name="email">
+                    <div class="mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" id="edit-name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" id="edit-role" name="role" required>
+                            <option value="Recruiter">Recruiter</option>
+                            <option value="Anchors">Anchors</option>
+                            <option value="Business Manager">Business Manager</option>
+                            <option value="Admin">Admin</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Team</label>
+                        <select class="form-select" id="edit-team" name="team">
+                            <option value="">None</option>
+                            <option value="ITS">ITS</option>
+                            <option value="OSS">OSS</option>
+                            <option value="PCS">PCS</option>
+                            <option value="ISV">ISV</option>
+                            <option value="Core">Core</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Manager Email</label>
+                        <input type="email" class="form-control" id="edit-manager" name="manager_email" placeholder="manager@example.com">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveUser()">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let users = [];
+let teams = ['ITS', 'OSS', 'PCS', 'ISV', 'Core'];
+let roles = ['Admin', 'Business Manager', 'Anchors', 'Recruiter'];
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadUsers();
+});
+
+function loadUsers() {
+    fetch('/api/admin/users')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                users = data.users;
+                renderUsers();
+            } else {
+                alert('Error loading users: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error loading users');
+        });
+}
+
+function renderUsers() {
+    const tbody = document.getElementById('users-tbody');
+    if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center">No users found</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = users.map(user => `
+        <tr>
+            <td>${user.email}</td>
+            <td>${user.name || '-'}</td>
+            <td><span class="badge bg-primary">${user.role}</span></td>
+            <td>${user.team || '-'}</td>
+            <td>${user.manager_email || '-'}</td>
+            <td>${new Date(user.created_at).toLocaleDateString()}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="editUser('${user.email}')">
+                    <i class="bi bi-pencil"></i> Edit
+                </button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function editUser(email) {
+    const user = users.find(u => u.email === email);
+    if (!user) return;
+
+    document.getElementById('edit-email').value = user.email;
+    document.getElementById('edit-name').value = user.name || '';
+    document.getElementById('edit-role').value = user.role;
+    document.getElementById('edit-team').value = user.team || '';
+    document.getElementById('edit-manager').value = user.manager_email || '';
+
+    const modal = new bootstrap.Modal(document.getElementById('editUserModal'));
+    modal.show();
+}
+
+function saveUser() {
+    const formData = {
+        email: document.getElementById('edit-email').value,
+        name: document.getElementById('edit-name').value,
+        role: document.getElementById('edit-role').value,
+        team: document.getElementById('edit-team').value,
+        manager_email: document.getElementById('edit-manager').value
+    };
+
+    fetch('/api/admin/users', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(formData)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+            loadUsers();
+            alert('User updated successfully!');
+        } else {
+            alert('Error updating user: ' + data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Error updating user');
+    });
+}
+
+function refreshUsers() {
+    loadUsers();
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,525 @@
+{% extends "base.html" %}
+
+{% block title %}Job History{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">
+                <i class="bi bi-clock-history"></i> Job-Centric History
+            </h4>
+            <p class="mb-0 small">View all handbooks and evaluations grouped by Job ID</p>
+    </div>
+        <div class="card-body">
+            <!-- Loading State -->
+            <div id="history-loading" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                            </div>
+                <p class="mt-3">Loading job history...</p>
+            </div>
+
+            <!-- Content Area -->
+            <div id="history-content" style="display: none;">
+                <!-- Filter Section -->
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="bi bi-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="job-filter" 
+                                   placeholder="Filter by Job ID or Job Title...">
+                            <button class="btn btn-outline-secondary" type="button" id="clear-job-filter">
+                                <i class="bi bi-x-circle"></i> Clear
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <span class="badge bg-info fs-6" id="job-count">0 jobs</span>
+                    </div>
+                        </div>
+                        
+                <!-- Job History Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-dark">
+                            <tr>
+                                <th style="width: 12%">Job ID</th>
+                                <th style="width: 22%">Job Title</th>
+                                <th style="width: 30%">Evaluated Resumes</th>
+                                <th style="width: 15%">Res Evaluated By</th>
+                                <th style="width: 10%">First Created</th>
+                                <th style="width: 10%">Last Activity</th>
+                                <th style="width: 10%">Actions</th>
+                </tr>
+                        </thead>
+                        <tbody id="job-history-table-body">
+                            <!-- Job history rows will be populated here -->
+            </tbody>
+        </table>
+    </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="history-empty" class="alert alert-info text-center" style="display: none;">
+                <i class="bi bi-info-circle fs-3"></i>
+                <h5 class="mt-3">No Job History Yet</h5>
+                <p>Start by generating a recruiter handbook or evaluating a resume.</p>
+                <a href="{{ url_for('resume_evaluator') }}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Get Started
+                </a>
+            </div>
+
+            <!-- Error State -->
+            <div id="history-error" class="alert alert-danger" style="display: none;">
+                <i class="bi bi-exclamation-triangle"></i> 
+                <span id="history-error-message">Error loading job history.</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Viewing Handbooks -->
+<div class="modal fade" id="handbooksModal" tabindex="-1" aria-labelledby="handbooksModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="handbooksModalLabel">
+                    <i class="bi bi-book"></i> Recruiter Handbooks
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="handbooksModalBody">
+                <!-- Handbooks list will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                        </div>
+                        
+<!-- Modal for Viewing Evaluations -->
+<div class="modal fade" id="evaluationsModal" tabindex="-1" aria-labelledby="evaluationsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="evaluationsModalLabel">
+                    <i class="bi bi-file-earmark-text"></i> Resume Evaluations
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="evaluationsModalBody">
+                <!-- Evaluations list will be populated here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.resume-badge {
+    display: inline-block;
+    margin: 2px;
+    padding: 4px 8px;
+    background: #e9ecef;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+.resume-badge:hover {
+    background: #dee2e6;
+    cursor: pointer;
+}
+.resume-score-good {
+    color: #28a745;
+    font-weight: bold;
+}
+.resume-score-medium {
+    color: #ffc107;
+    font-weight: bold;
+}
+.resume-score-low {
+    color: #dc3545;
+    font-weight: bold;
+}
+.clickable {
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.clickable:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadJobHistory();
+    
+    // Filter functionality
+    document.getElementById('job-filter').addEventListener('input', filterJobs);
+    document.getElementById('clear-job-filter').addEventListener('click', function() {
+        document.getElementById('job-filter').value = '';
+        filterJobs();
+    });
+});
+
+async function loadJobHistory() {
+    const loadingDiv = document.getElementById('history-loading');
+    const contentDiv = document.getElementById('history-content');
+    const emptyDiv = document.getElementById('history-empty');
+    const errorDiv = document.getElementById('history-error');
+    
+    try {
+        loadingDiv.style.display = 'block';
+        contentDiv.style.display = 'none';
+        emptyDiv.style.display = 'none';
+        errorDiv.style.display = 'none';
+        
+        const response = await fetch('/api/job-centric-history');
+        const data = await response.json();
+        
+        if (data.success) {
+            if (data.jobs && data.jobs.length > 0) {
+                renderJobTable(data.jobs);
+                contentDiv.style.display = 'block';
+            } else {
+                emptyDiv.style.display = 'block';
+            }
+        } else {
+            throw new Error(data.message || 'Failed to load job history');
+        }
+    } catch (error) {
+        console.error('Error loading job history:', error);
+        document.getElementById('history-error-message').textContent = error.message;
+        errorDiv.style.display = 'block';
+    } finally {
+        loadingDiv.style.display = 'none';
+    }
+}
+
+// Store jobs data globally for access by click handlers
+let jobsData = [];
+
+function renderJobTable(jobs) {
+    jobsData = jobs; // Store for later use
+    const tbody = document.getElementById('job-history-table-body');
+    const countBadge = document.getElementById('job-count');
+    
+    countBadge.textContent = `${jobs.length} job${jobs.length !== 1 ? 's' : ''}`;
+    
+    tbody.innerHTML = jobs.map((job, index) => {
+        // Format resume list with scores
+        let resumeListHTML = '';
+        if (job.evaluations_count > 0) {
+            const displayedResumes = job.resume_list.slice(0, 3);
+            const hasMore = job.resume_list.length > 3;
+            
+            resumeListHTML = displayedResumes.map((resume, rIndex) => {
+                const scoreClass = resume.match_percentage >= 70 ? 'resume-score-good' :
+                                   resume.match_percentage >= 50 ? 'resume-score-medium' : 'resume-score-low';
+                return `<span class="resume-badge clickable" data-job-index="${index}" title="Click to view evaluation details">
+                    ${truncateFilename(resume.filename, 20)} 
+                    <span class="${scoreClass}">(${resume.match_percentage}%)</span>
+                </span>`;
+            }).join('');
+            
+            if (hasMore) {
+                resumeListHTML += `<span class="badge bg-secondary clickable" data-job-index="${index}" title="View all evaluations">+${job.resume_list.length - 3} more</span>`;
+            }
+        } else {
+            resumeListHTML = '<span class="text-muted">No evaluations yet</span>';
+        }
+        
+        // Format Res Evaluated By
+        let resEvaluatedHTML = '';
+        if (job.res_evaluated_by && job.res_evaluated_by.length > 0) {
+            resEvaluatedHTML = job.res_evaluated_by.map(user => {
+                return `<span class="badge bg-success" title="${escapeHtml(user.email)}">${escapeHtml(user.name)}</span>`;
+            }).join(' ');
+        } else {
+            resEvaluatedHTML = '<span class="text-muted">-</span>';
+        }
+        
+        return `
+            <tr data-job-id="${escapeHtml(job.job_id)}" data-job-title="${escapeHtml(job.job_title)}" data-job-index="${index}">
+                <td><strong>${escapeHtml(job.job_id)}</strong></td>
+                <td>
+                    ${job.handbooks_count > 0 
+                        ? `<a href="#" onclick="openHandbookForJob(${index}); return false;" title="View recruiter handbook">
+                               ${escapeHtml(job.job_title)}
+                           </a>`
+                        : `<span class="text-muted">${escapeHtml(job.job_title)}</span>`}
+                </td>
+                <td>
+                    <div class="d-flex flex-wrap gap-1">
+                        ${resumeListHTML}
+                    </div>
+                    <small class="text-muted">${job.evaluations_count} total</small>
+                </td>
+                <td>
+                    <div class="d-flex flex-wrap gap-1">
+                        ${resEvaluatedHTML}
+                    </div>
+                </td>
+                <td><small>${formatDate(job.first_created)}</small></td>
+                <td><small>${formatDate(job.last_activity)}</small></td>
+                <td>
+                    <a href="/resume-evaluator?job_id=${encodeURIComponent(job.job_id)}" 
+                       class="btn btn-sm btn-success" title="Evaluate resume for this job">
+                        <i class="bi bi-person-check"></i> Evaluate
+                    </a>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    // Add click handlers for handbooks and evaluations
+    addClickHandlers();
+}
+
+function addClickHandlers() {
+    // "+X more" evaluations badge clicks
+    document.querySelectorAll('.badge.clickable[data-job-index]').forEach(badge => {
+        badge.addEventListener('click', function() {
+            const jobIndex = parseInt(this.getAttribute('data-job-index'));
+            const job = jobsData[jobIndex];
+            showEvaluationsModal(job);
+        });
+    });
+
+    // Resume badge clicks
+    document.querySelectorAll('.resume-badge.clickable').forEach(badge => {
+        badge.addEventListener('click', function() {
+            const jobIndex = parseInt(this.getAttribute('data-job-index'));
+            const job = jobsData[jobIndex];
+            showEvaluationsModal(job);
+        });
+    });
+}
+
+function filterJobs() {
+    const filterValue = document.getElementById('job-filter').value.toLowerCase();
+    const rows = document.querySelectorAll('#job-history-table-body tr');
+    let visibleCount = 0;
+    
+    rows.forEach(row => {
+        const jobId = row.getAttribute('data-job-id').toLowerCase();
+        const jobTitle = row.getAttribute('data-job-title').toLowerCase();
+        
+        if (jobId.includes(filterValue) || jobTitle.includes(filterValue)) {
+            row.style.display = '';
+            visibleCount++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
+    
+    document.getElementById('job-count').textContent = `${visibleCount} job${visibleCount !== 1 ? 's' : ''}`;
+}
+
+function formatDate(dateString) {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function truncateFilename(filename, maxLength) {
+    if (filename.length <= maxLength) return filename;
+    const ext = filename.split('.').pop();
+    const nameWithoutExt = filename.substring(0, filename.lastIndexOf('.'));
+    const truncated = nameWithoutExt.substring(0, maxLength - ext.length - 4) + '...';
+    return truncated + '.' + ext;
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Open handbook directly when clicking Job Title (since only one handbook per Job ID is allowed)
+async function openHandbookForJob(jobIndex) {
+    const job = jobsData[jobIndex];
+    if (!job || !job.job_id) {
+        alert('Job information not available.');
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/handbooks-by-job/${encodeURIComponent(job.job_id)}`);
+        const data = await response.json();
+
+        if (data.success && data.handbooks && data.handbooks.length > 0) {
+            const handbook = data.handbooks[0]; // Only one handbook per Job ID by design
+            // Store handbook data for the next page (same pattern used elsewhere)
+            sessionStorage.setItem('viewHandbookData', JSON.stringify(handbook));
+            window.location.href = '/resume-evaluator?view_handbook=' + handbook.id;
+        } else {
+            alert('No handbook found for this Job ID.');
+        }
+    } catch (error) {
+        console.error('Error opening handbook for job:', error);
+        alert('Error loading handbook. Please try again.');
+    }
+}
+
+async function showHandbooksModal(job) {
+    const modal = new bootstrap.Modal(document.getElementById('handbooksModal'));
+    const modalBody = document.getElementById('handbooksModalBody');
+    
+    document.getElementById('handbooksModalLabel').innerHTML = `
+        <i class="bi bi-book"></i> Handbooks for ${escapeHtml(job.job_title)} (${escapeHtml(job.job_id)})
+    `;
+    
+    modalBody.innerHTML = '<div class="text-center py-3"><div class="spinner-border"></div><p>Loading handbooks...</p></div>';
+    modal.show();
+    
+    try {
+        const response = await fetch(`/api/handbooks-by-job/${encodeURIComponent(job.job_id)}`);
+        const data = await response.json();
+        
+        if (data.success && data.handbooks.length > 0) {
+            modalBody.innerHTML = data.handbooks.map((handbook, index) => `
+                <div class="card mb-3">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">Handbook #${index + 1}</h6>
+                        <small class="text-muted">${formatDate(handbook.timestamp)}</small>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Job Title:</strong> ${escapeHtml(handbook.job_title)}</p>
+                        <p><strong>Generated by:</strong> <span class="badge bg-info">${escapeHtml(handbook.user_name || handbook.user_email || 'Unknown')}</span></p>
+                        <p><strong>Additional Context:</strong> ${escapeHtml(handbook.additional_context || 'None')}</p>
+                        <button class="btn btn-sm btn-primary" onclick="viewHandbookContent(${index})">
+                            <i class="bi bi-eye"></i> View Full Content
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Store handbook data for viewing
+            window.currentHandbooksData = data.handbooks;
+        } else {
+            modalBody.innerHTML = '<p class="text-muted">No handbooks found for this job.</p>';
+        }
+    } catch (error) {
+        modalBody.innerHTML = `<div class="alert alert-danger">Error loading handbooks: ${error.message}</div>`;
+    }
+}
+
+function viewHandbookContent(index) {
+    const handbook = window.currentHandbooksData[index];
+    
+    // Close the modal first
+    const modal = bootstrap.Modal.getInstance(document.getElementById('handbooksModal'));
+    if (modal) modal.hide();
+    
+    // Store handbook data in session storage for the next page
+    sessionStorage.setItem('viewHandbookData', JSON.stringify(handbook));
+    
+    // Navigate to resume evaluator page in handbook view mode
+    window.location.href = '/resume-evaluator?view_handbook=' + handbook.id;
+}
+
+async function showEvaluationsModal(job) {
+    const modal = new bootstrap.Modal(document.getElementById('evaluationsModal'));
+    const modalBody = document.getElementById('evaluationsModalBody');
+    
+    document.getElementById('evaluationsModalLabel').innerHTML = `
+        <i class="bi bi-file-earmark-text"></i> Evaluations for ${escapeHtml(job.job_title)} (${escapeHtml(job.job_id)})
+    `;
+    
+    modalBody.innerHTML = '<div class="text-center py-3"><div class="spinner-border"></div><p>Loading evaluations...</p></div>';
+    modal.show();
+    
+    try {
+        const response = await fetch(`/api/evaluations-by-job/${encodeURIComponent(job.job_id)}`);
+        const data = await response.json();
+        
+        if (data.success && data.evaluations.length > 0) {
+            modalBody.innerHTML = `
+                                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Resume</th>
+                                <th>Match Score</th>
+                                <th>Evaluated By</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                                        </thead>
+                                        <tbody>
+                            ${data.evaluations.map(eval => {
+                                const scoreClass = eval.match_percentage >= 70 ? 'text-success' :
+                                                   eval.match_percentage >= 50 ? 'text-warning' : 'text-danger';
+                                return `
+                                    <tr>
+                                        <td>${escapeHtml(eval.filename)}</td>
+                                        <td class="${scoreClass}"><strong>${eval.match_percentage}%</strong></td>
+                                        <td>
+                                            <span class="badge bg-success" title="${escapeHtml(eval.user_email || '')}">
+                                                ${escapeHtml(eval.evaluator_name || 'Unknown')}
+                                            </span>
+                                        </td>
+                                        <td><small>${formatDate(eval.timestamp)}</small></td>
+                                        <td>
+                                            <button class="btn btn-sm btn-primary view-evaluation-btn" data-eval-id="${eval.id}">
+                                                <i class="bi bi-eye"></i> View
+                                            </button>
+                                        </td>
+                                                    </tr>
+                                `;
+                            }).join('')}
+                                        </tbody>
+                                    </table>
+                                </div>
+            `;
+            
+            // Add click handlers for view buttons
+            setTimeout(() => {
+                document.querySelectorAll('.view-evaluation-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const evalId = this.getAttribute('data-eval-id');
+                        viewEvaluationDetails(evalId);
+                    });
+                });
+            }, 100);
+        } else {
+            modalBody.innerHTML = '<p class="text-muted">No evaluations found for this job.</p>';
+        }
+    } catch (error) {
+        modalBody.innerHTML = `<div class="alert alert-danger">Error loading evaluations: ${error.message}</div>`;
+    }
+}
+
+async function viewEvaluationDetails(evalId) {
+    try {
+        // Fetch full evaluation data
+        const response = await fetch(`/api/evaluation-full/${evalId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            // Close the modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('evaluationsModal'));
+            if (modal) modal.hide();
+            
+            // Store evaluation data in session storage
+            sessionStorage.setItem('viewEvaluationData', JSON.stringify(data.evaluation));
+            
+            // Navigate to resume evaluator page in evaluation view mode
+            window.location.href = '/resume-evaluator?view_evaluation=' + evalId;
+        } else {
+            alert('Error loading evaluation details: ' + data.message);
+        }
+    } catch (error) {
+        alert('Error loading evaluation details: ' + error.message);
+    }
+}
+</script>
+
+{% endblock %} 

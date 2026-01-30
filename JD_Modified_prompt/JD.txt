@@ -1,0 +1,47 @@
+Mainframe zLinux Middleware Administrator - ROle title, and the JD is - Who We Are
+At Kyndryl, we design, build, manage and modernize the mission-critical technology systems that the world depends on every day. So why work at Kyndryl? We are always moving forward – always pushing ourselves to go further in our efforts to build a more equitable, inclusive world for our employees, our customers and our communities.
+
+The Role
+In Systems Management at Kyndryl, you will be critical in ensuring the smooth operation of our customers’ IT infrastructure. You'll be the mastermind behind maintaining and optimizing their systems, ensuring they're always running at peak performance. 
+
+Not only will you be responsible for managing and maintaining the IT infrastructure, but you'll also have the opportunity to work on cutting-edge technologies and innovative solutions that will shape the future of the industry. You'll be at the forefront of new service preparation and change management processes, constantly learning and growing your technical expertise to ensure the best outcomes for our customers.
+
+Your technical prowess will be put to the test as you troubleshoot critical customer situations and provide timely solutions to keep their systems secure, reliable, and efficient. You'll be the go-to expert for sizing and optimizing systems, ensuring our customers' business performance is always world-class.
+
+At Kyndryl, we're committed to providing the best possible service to our customers, and as a Systems Management Specialist, you'll be an integral part of that mission. So if you're passionate about technology and want to be part of a dynamic team that's shaping the future of IT infrastructure management – then this role is for you.
+Key Responsibilities: 
+Manage persistent storage, networking, and OpenShift Service Mesh.
+Automate deployments using Helm charts, Ansible, and CI/CD pipelines.
+Monitor and optimize OpenShift cluster performance, scaling, and resource allocation.
+Enforce best practices for WebSphere and OpenShift security hardening.
+Perform vulnerability assessments, patch management, and compliance audits for middleware technologies
+Integrate middleware logging and monitoring with Splunk, ELK, and Grafana dashboards.
+Diagnose and resolve middleware performance issues, application failures, and system crashes.
+Troubleshoot OpenShift cluster issues, pod failures, and networking problems.
+Analyze logs from WebSphere, IHS, and MQ to identify root causes and implement fixes.
+Your Future at Kyndryl
+Kyndryl's focus on providing innovative IT solutions to its customers means that in Systems Management, you will be working with the latest technology and will have the opportunity to learn and grow your skills. You may also have the opportunity to work on large-scale projects and collaborate with other IT professionals from around the world.
+
+Who You Are
+You’re good at what you do and possess the required experience to prove it. However, equally as important – you have a growth mindset; keen to drive your own personal and professional development. You are customer-focused – someone who prioritizes customer success in their work. And finally, you’re open and borderless – naturally inclusive in how you work with others.
+
+Required Technical and Professional Expertise
+6+ Years Experience  zLinux Middleware Administrator.
+Install, configure, and manage OpenShift, WebSphere Application Server (WAS), IBM HTTP Server (IHS), and IBM MQ on IBM Z/Linux.
+Deploy and manage containerized applications using Kubernetes and OpenShift operators.
+Configure and maintain high availability (HA), clustering, and load balancing for all middleware components.
+Tune JVM settings, heap size, garbage collection, and thread pools for WebSphere applications.
+Optimize IBM MQ message flow, queue depth, and performance.
+Configure caching, compression, and load balancing in IHS for improved web performance.
+Use Splunk, ELK, Prometheus, Grafana, or IBM Tivoli Monitoring (ITM) for real-time system and application monitoring.
+Implement SSL/TLS encryption, LDAP authentication, OAuth, and RBAC policies across middleware components.
+Secure IBM MQ with SSL encryption, authentication, and message signing.
+Set up WebSphere Network Deployment (ND) clusters for high availability.
+Configure multi-instance queue managers and failover strategies for IBM MQ.
+Preferred Technical and Professional Experience
+Implement OpenShift scaling policies for auto-scaling and redundancy.
+Ensure backup and recovery strategies using IBM Spectrum Protect (TSM).
+Develop Ansible playbooks, Python scripts, and shell scripts to automate administration tasks.
+Build and maintain CI/CD pipelines for WebSphere, OpenShift, and IBM MQ.
+Provide 24/7 on-call support for production environments (if required).
+Work closely with application developers, DevOps teams, network engineers, and security teams. PRovide recruiter analysis and screening comments

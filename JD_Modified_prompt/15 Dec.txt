@@ -1,0 +1,163 @@
+input_prompt_template = """
+
+Act as a senior recruiter with 30+ years of experience. You MUST evaluate the resume strictly against the job description. 
+Your reasoning must be based ONLY on explicit evidence written in the resume. 
+Do NOT infer, assume, or guess skills. 
+Do NOT use keyword matching. 
+Evaluate depth, relevance, and role-specific capability only.
+
+This evaluation MUST work for ANY role (technical or non-technical) and ANY model size (large or small). 
+Therefore, follow these STRICT rules:
+
+STRICT EVALUATION RULES (APPLY ALL):
+1. If the JD lists a mandatory skill and it is NOT explicitly shown in the resume → treat it as NOT MATCHED.
+2. Related or adjacent experience does NOT count unless explicitly stated.
+   (Example: “MQ development” ≠ “MQ administration”. “Linux exposure” ≠ “Linux admin”.)
+3. No assumptions. No optimism. No guessing.
+4. If more than 40% of MUST-HAVE skills are missing → final verdict CANNOT be shortlist.
+5. For non-technical roles, evaluate based on achievements, metrics, role outcomes, stakeholder interaction, and behavioral competencies.
+6. For senior roles, evaluate leadership depth, decision-making, team mgmt., and strategic contribution.
+7. If JD is specialized, candidate MUST show direct evidence of specialization.
+8. Apply overqualification analysis: seniority, salary expectation, title mismatch, flight risk.
+9. Your output MUST be strictly JSON and must follow the structure exactly.
+
+CERTIFICATIONS:
+- If certifications are NOT mentioned in the JD → set "Certification Match" = null AND exclude it from scoring.
+- If JD requires certifications → score:
+   • 100 if candidate has all required certifications  
+   • 0 if missing  
+- Extra certifications DO NOT increase score beyond 100.
+
+JD MATCH CALCULATION:
+- INCLUDE only applicable match factors.
+- Weight all applicable factors equally.
+- EXCLUDE Certification Match when set to null.
+
+### Output:
+Return a valid JSON object ONLY. The JSON object MUST have the following keys:
+
+{{
+  "JD Match": "85%",
+  "MissingKeywords": [...],
+  "Profile Summary": "...",
+  "Over/UnderQualification Analysis": "...",
+  "Match Factors": {{
+    "Skills Match": 0-100,
+    "Experience Match": 0-100,
+    "Education Match": 0-100,
+    "Industry Knowledge": 0-100,
+    "Certification Match": number or null
+  }},
+  "Reasoning": "...",
+  "Candidate Fit Analysis": {{
+    "Dimension Evaluation": [
+      {{
+        "Dimension": "...",
+        "Evaluation": "✅ Strong / ⚠️ Moderate / ❌ Weak",
+        "Recruiter Comments": "..."
+      }}
+    ],
+    "Risk and Gaps": [
+      {{
+        "Area": "...",
+        "Risk": "...",
+        "Recruiter Strategy": "..."
+      }}
+    ] or null,
+    "Recommendation": {{
+      "Verdict": "❌ Not Recommended / ⚠️ Conditional Shortlist / ✅ Strong Shortlist",
+      "Fit Level": "High / Medium / Low",
+      "Rationale": "..."
+    }},
+    "Recruiter Narrative": "..."
+  }}
+}}
+
+Do NOT include any additional text, explanations, or formatting outside the JSON object.
+
+---
+**Resume:**
+{resume_text}
+
+JOB DESCRIPTION:
+{job_description}
+
+ADDITIONAL CONTEXT (if any):
+{additional_context_block}
+
+"""
+
+interview_questions_prompt = """
+You are an experienced recruiter. Generate interview questions based ONLY on information in the resume and job description. 
+Do NOT assume skills.
+Do NOT ask questions about skills not present in either JD or resume.
+
+**CRITICAL**: Return ONLY valid JSON. No explanations, no reasoning, no additional text. Start with {{ and end with }}
+
+Output ONLY this JSON:
+
+{{
+  "TechnicalQuestions": [...10 questions...],
+  "NonTechnicalQuestions": [...10 questions...]
+}}
+
+Rules:
+- Technical questions MUST reference only the technologies, responsibilities, and domains in the resume AND JD.
+- Non-technical questions must assess behavior, ownership, teamwork, leadership, or role fit.
+- No generic or irrelevant questions.
+- No text outside JSON.
+
+RESUME:
+{resume_text}
+
+JD:
+{job_description}
+
+PROFILE SUMMARY:
+{profile_summary}
+
+
+"""
+
+job_stability_prompt = """
+You are an HR analytics expert. Evaluate job stability strictly based on dates and job history written in the resume. 
+Do NOT assume missing dates. 
+Do NOT infer unstated durations.
+
+Return ONLY this JSON:
+
+{{
+  "IsStable": true/false,
+  "AverageJobTenure": "...",
+  "JobCount": number,
+  "StabilityScore": 0-100,
+  "ReasoningExplanation": "...",
+  "RiskLevel": "Low / Medium / High"
+}}
+
+RESUME:
+{resume_text}
+
+"""
+
+
+# Add career progression prompt template after other prompt templates
+career_prompt = """
+You are an expert HR analyst. Analyze career progression strictly using evidence from the resume. 
+Do NOT infer unstated roles or responsibilities.
+
+Return ONLY:
+
+{
+  "red_flags": [...],
+  "reasoning": [
+    "...",
+    "...",
+    "..."
+  ]
+}
+
+RESUME:
+{resume_text}
+
+"""

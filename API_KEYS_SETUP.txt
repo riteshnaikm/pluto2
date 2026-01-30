@@ -1,0 +1,134 @@
+========================
+API KEYS SETUP GUIDE
+========================
+
+Your application requires a .env file with the following API keys.
+
+STEP 1: Create a file named ".env" in the root directory (C:\Users\Ritesh\Desktop\Cursor 1\)
+
+STEP 2: Add the following content to the .env file:
+
+---------------------------------------------------
+# API Keys Configuration
+
+# Groq API Key (for HR Assistant chatbot - uses Llama 3.1)
+GROQ_API_KEY=your_groq_api_key_here
+
+# Pinecone API Key (for vector database search)
+PINECONE_API_KEY=your_pinecone_api_key_here
+
+# Google Gemini API Key (for resume evaluation - uses Gemini 2.5 Flash)
+GOOGLE_API_KEY=your_google_gemini_api_key_here
+GEMINI_API_KEY=your_google_gemini_api_key_here
+
+# OpenAI API Key (OPTIONAL - only needed if using ChatGPT)
+OPENAI_API_KEY=your_openai_api_key_here
+
+# Model Selection Configuration
+# Choose which AI model provider to use for resume evaluation
+# Options: "gemini" (default), "openai", or "groq"
+MODEL_PROVIDER=gemini
+
+# Gemini Model Selection (only used if MODEL_PROVIDER=gemini)
+# Options: gemini-2.5-flash (default), gemini-2.5-pro, gemini-2.0-flash
+GEMINI_MODEL=gemini-2.5-flash
+
+# OpenAI Model Selection (only used if MODEL_PROVIDER=openai)
+# Options: gpt-4o, gpt-4o-mini (default), gpt-4-turbo, gpt-3.5-turbo
+OPENAI_MODEL=gpt-4o-mini
+
+# Groq Model Selection (only used if MODEL_PROVIDER=groq)
+# Options: openai/gpt-oss-120b (default), llama-3.3-70b-versatile, llama-3.1-70b-versatile
+GROQ_MODEL=openai/gpt-oss-120b
+
+# Groq Reasoning Effort (only for reasoning models like gpt-oss)
+# Options: low, medium, high (default)
+GROQ_REASONING_EFFORT=high
+---------------------------------------------------
+
+STEP 3: Get your API keys from:
+
+1. GROQ (Free tier available)
+   URL: https://console.groq.com/keys
+   - Sign up for an account
+   - Navigate to API Keys section
+   - Create a new API key
+   - Copy and paste it in the .env file
+
+2. Pinecone (Free tier available)
+   URL: https://app.pinecone.io/
+   - Sign up for an account
+   - Go to API Keys in the left sidebar
+   - Copy your API key
+   - Paste it in the .env file
+
+3. Google Gemini (Free tier available)
+   URL: https://makersuite.google.com/app/apikey
+   OR: https://aistudio.google.com/app/apikey
+   - Sign in with your Google account
+   - Click "Create API Key"
+   - Copy the API key
+   - Paste it in both GOOGLE_API_KEY and GEMINI_API_KEY fields
+
+4. OpenAI (OPTIONAL - only if you want to use ChatGPT)
+   URL: https://platform.openai.com/api-keys
+   - Sign in with your OpenAI account
+   - Click "Create new secret key"
+   - Copy the API key (you won't be able to see it again!)
+   - Paste it in OPENAI_API_KEY field
+   - Note: OpenAI is a paid service. Make sure you have credits in your account.
+
+NOTE: Groq API key is already configured (same key used for HR chatbot).
+      Just set MODEL_PROVIDER=groq to use Groq models for resume evaluation.
+
+STEP 3.5: Choose Your AI Model Provider
+
+The application now supports THREE AI providers for resume evaluation:
+
+Option A - Use Google Gemini (Default, Free Tier Available):
+   Set in .env: MODEL_PROVIDER=gemini
+   - Gemini 2.5 Flash (fast, recommended)
+   - Gemini 2.5 Pro (more powerful)
+   
+Option B - Use Groq (Paid, BLAZING FAST, Reasoning Models):
+   Set in .env: MODEL_PROVIDER=groq
+   - openai/gpt-oss-120b (reasoning model, recommended for quality)
+   - llama-3.3-70b-versatile (fastest, great quality)
+   - llama-3.1-70b-versatile (very good)
+   - Note: Uses your existing GROQ_API_KEY
+
+Option C - Use OpenAI ChatGPT (Paid, Premium Quality):
+   Set in .env: MODEL_PROVIDER=openai
+   - GPT-4o-mini (fastest, cheapest, good quality)
+   - GPT-4o (most capable, expensive)
+   - GPT-4-turbo (powerful, expensive)
+   - GPT-3.5-turbo (fast, cheap, lower quality)
+
+To switch models, simply change MODEL_PROVIDER in your .env file and restart the application.
+
+STEP 4: Save the .env file
+
+STEP 5: Run the application:
+   python run.py
+
+========================
+TROUBLESHOOTING
+========================
+
+If you still get errors after setting up API keys:
+
+1. Make sure the .env file is in the same directory as run.py
+2. Check that there are no extra spaces in the API keys
+3. Verify each API key is valid by checking the respective dashboards
+4. Ensure your Pinecone index is created (the app will try to create "hr-knowledge-base" index)
+
+For the Pinecone index:
+- Dimension: 384
+- Metric: cosine
+- Cloud: AWS
+- Region: us-east-1
+
+========================
+
+
+

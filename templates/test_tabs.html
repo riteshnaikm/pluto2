@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Tab Test{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Tab Test Page</h2>
+    
+    <div class="card">
+        <div class="card-header">
+            <ul class="nav nav-tabs card-header-tabs" id="testTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="tab1-tab" data-bs-toggle="tab" 
+                            data-bs-target="#tab1" type="button" role="tab">
+                        Tab 1 - Evaluation
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="tab2-tab" data-bs-toggle="tab" 
+                            data-bs-target="#tab2" type="button" role="tab">
+                        Tab 2 - Recruiter Handbook
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                <div class="tab-pane fade show active" id="tab1" role="tabpanel">
+                    <h3>This is Tab 1 Content</h3>
+                    <p>If you can see this, tabs are working!</p>
+                </div>
+                <div class="tab-pane fade" id="tab2" role="tabpanel">
+                    <h3>This is Tab 2 Content - Recruiter Handbook</h3>
+                    <p>If you can click Tab 2 and see this, the tab structure is correct!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

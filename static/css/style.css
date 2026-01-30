@@ -1,0 +1,397 @@
+/* General Styles */
+body {
+    padding-top: 2rem;
+    background-color: #f8f9fa;
+}
+
+/* Navbar Styles */
+.navbar {
+    background-color: #2c3e50;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    color: #ecf0f1 !important;
+    font-weight: bold;
+}
+
+.nav-link {
+    color: #ecf0f1 !important;
+    transition: color 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #3498db !important;
+}
+
+/* Card Styles */
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1.5rem;
+}
+
+.card-header {
+    background-color: #2c3e50;
+    color: white;
+    border-bottom: none;
+}
+
+/* Form Styles */
+.form-control {
+    border-radius: 0.25rem;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 1rem;
+}
+
+.form-control:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: #3498db;
+    border-color: #3498db;
+    padding: 0.5rem 1.5rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #2980b9;
+    border-color: #2980b9;
+    transform: translateY(-1px);
+}
+
+/* Progress Bar Styles */
+.progress {
+    height: 1.5rem;
+    background-color: #ecf0f1;
+    border-radius: 0.25rem;
+    overflow: hidden;
+}
+
+.progress-bar {
+    background-color: #3498db;
+    transition: width 0.6s ease;
+}
+
+/* List Group Styles */
+.list-group-item {
+    border: 1px solid #ecf0f1;
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 0.25rem;
+}
+
+/* Badge Styles */
+.badge {
+    padding: 0.5em 1em;
+    font-weight: 500;
+}
+
+/* Alert Styles */
+.alert {
+    border: none;
+    border-radius: 0.25rem;
+    padding: 1rem;
+}
+
+/* Tab Styles */
+.nav-tabs .nav-link {
+    color: #2c3e50 !important;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin-right: 0.5rem;
+}
+
+.nav-tabs .nav-link.active {
+    color: #3498db !important;
+    border-bottom: 2px solid #3498db;
+}
+
+/* Dark Mode Styles */
+.dark-mode {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.dark-mode .card {
+    background-color: #2d2d2d;
+    border-color: #404040;
+}
+
+.dark-mode .form-control {
+    background-color: #2d2d2d;
+    border-color: #404040;
+    color: #ffffff;
+}
+
+.dark-mode .list-group-item {
+    background-color: #2d2d2d;
+    border-color: #404040;
+    color: #ffffff;
+}
+
+/* Markdown Content Styles for Info Buddy Response */
+#response-content {
+    line-height: 1.7;
+    font-size: 15px;
+    color: #333;
+}
+
+/* Headings */
+#response-content h1 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #2c3e50;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 0.5rem;
+}
+
+#response-content h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #34495e;
+}
+
+#response-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #34495e;
+}
+
+/* Paragraphs */
+#response-content p {
+    margin-bottom: 1rem;
+    line-height: 1.8;
+}
+
+/* Lists */
+#response-content ul,
+#response-content ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+#response-content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.7;
+}
+
+#response-content ul li {
+    list-style-type: disc;
+}
+
+#response-content ol li {
+    list-style-type: decimal;
+}
+
+/* Tables - Enhanced Styling */
+#response-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    table-layout: fixed; /* more consistent column widths for long text */
+}
+
+#response-content table thead {
+    background-color: #3498db;
+    color: #fff;
+}
+
+#response-content table th {
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-bottom: 2px solid #2980b9;
+    white-space: nowrap; /* keep headers in one line */
+}
+
+#response-content table td {
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid #e0e0e0;
+    vertical-align: top;
+    word-break: break-word; /* wrap long city/holiday names nicely */
+}
+
+/* Helpful default widths for first columns */
+#response-content table td:nth-child(1),
+#response-content table th:nth-child(1) { width: 110px; }
+#response-content table td:nth-child(2),
+#response-content table th:nth-child(2) { width: 100px; }
+
+#response-content table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+#response-content table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+#response-content table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* Alternating row colors for better readability */
+#response-content table tbody tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+
+#response-content table tbody tr:nth-child(even):hover {
+    background-color: #e9ecef;
+}
+
+/* Table container for horizontal scroll on mobile */
+#response-content .table-container {
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+/* Horizontal Rules */
+#response-content hr {
+    border: none;
+    border-top: 2px solid #e0e0e0;
+    margin: 2rem 0;
+}
+
+/* Code blocks */
+#response-content code {
+    background-color: #f4f4f4;
+    padding: 0.2rem 0.4rem;
+    border-radius: 0.25rem;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+    color: #e74c3c;
+}
+
+#response-content pre {
+    background-color: #f4f4f4;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+}
+
+#response-content pre code {
+    background-color: transparent;
+    padding: 0;
+    color: #333;
+}
+
+/* Blockquotes */
+#response-content blockquote {
+    border-left: 4px solid #3498db;
+    padding-left: 1rem;
+    margin: 1rem 0;
+    color: #555;
+    font-style: italic;
+}
+
+/* Bold and italic */
+#response-content strong {
+    color: #2c3e50;
+    font-weight: 600;
+}
+
+/* Recruiter Handbook sub-category styling (e.g., A. Background & Motivation lines) */
+.sf-category {
+    display: block;
+.font-weight: 600;
+    font-size: 0.95rem;
+    color: #2c3e50;
+    margin-bottom: 2px;
+}
+.sf-detail {
+    margin-left: 0;
+    font-size: 0.95rem;
+}
+
+/* Links */
+#response-content a {
+    color: #3498db;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+#response-content a:hover {
+    border-bottom-color: #3498db;
+}
+
+/* Spacing between sections */
+#response-content > *:first-child {
+    margin-top: 0;
+}
+
+#response-content > *:last-child {
+    margin-bottom: 0;
+}
+
+/* Smooth scrolling for anchor links */
+html {
+    scroll-behavior: smooth;
+}
+
+/* TOC navigation styling */
+.toc-nav a {
+    text-decoration: none;
+}
+
+/* Ensure headings have scroll margin for anchor links */
+#handbook-content h1,
+#handbook-content h2,
+#handbook-content h3,
+#handbook-content h4,
+.recruiter-handbook-content h1,
+.recruiter-handbook-content h2,
+.recruiter-handbook-content h3,
+.recruiter-handbook-content h4 {
+    scroll-margin-top: 120px;
+}
+
+/* Blue color for main handbook section titles (EXCLUDE Introduction) */
+#handbook-content h2.main-section-title,
+#handbook-content h3.main-section-title,
+.recruiter-handbook-content h2.main-section-title,
+.recruiter-handbook-content h3.main-section-title {
+    color: #3498db !important;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+    
+    /* Smaller tables on mobile */
+    #response-content table {
+        font-size: 0.875rem;
+    }
+    
+    #response-content table th,
+    #response-content table td {
+        padding: 0.5rem;
+    }
+    
+    /* Horizontal scroll for tables on mobile */
+    #response-content {
+        overflow-x: auto;
+    }
+} 

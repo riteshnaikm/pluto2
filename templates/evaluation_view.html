@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluation - {{ evaluation.filename }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="bi bi-file-earmark-text"></i> Resume Evaluation
+                </h4>
+                <a href="/history" class="btn btn-light btn-sm">
+                    <i class="bi bi-arrow-left"></i> Back to History
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- Header Info -->
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5><i class="bi bi-person"></i> {{ evaluation.filename }}</h5>
+                    <p class="text-muted mb-1"><strong>Job Title:</strong> {{ evaluation.job_title }}</p>
+                    {% if evaluation.oorwin_job_id %}
+                    <p class="text-muted mb-1"><strong>Job ID:</strong> {{ evaluation.oorwin_job_id }}</p>
+                    {% endif %}
+                    <p class="text-muted mb-0"><strong>Evaluated:</strong> {{ evaluation.timestamp }}</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <div class="display-4 mb-2">
+                        {% if evaluation.match_percentage >= 70 %}
+                            <span class="text-success">{{ evaluation.match_percentage }}%</span>
+                        {% elif evaluation.match_percentage >= 50 %}
+                            <span class="text-warning">{{ evaluation.match_percentage }}%</span>
+                        {% else %}
+                            <span class="text-danger">{{ evaluation.match_percentage }}%</span>
+                        {% endif %}
+                    </div>
+                    <p class="text-muted">Match Score</p>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Match Factors -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3"><i class="bi bi-bar-chart"></i> Match Factors</h5>
+                    {% if evaluation.match_factors %}
+                        {% for factor, score in evaluation.match_factors.items() %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span><strong>{{ factor }}</strong></span>
+                                <span class="badge bg-primary">{{ score }}</span>
+                            </div>
+                            <div class="progress" style="height: 25px;">
+                                {% if score >= 70 %}
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: {{ score }}%" aria-valuenow="{{ score }}" aria-valuemin="0" aria-valuemax="100">{{ score }}%</div>
+                                {% elif score >= 50 %}
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: {{ score }}%" aria-valuenow="{{ score }}" aria-valuemin="0" aria-valuemax="100">{{ score }}%</div>
+                                {% else %}
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: {{ score }}%" aria-valuenow="{{ score }}" aria-valuemin="0" aria-valuemax="100">{{ score }}%</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No match factors available</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Profile Summary -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3"><i class="bi bi-person-badge"></i> Profile Summary</h5>
+                    <div class="p-3 border rounded bg-light">
+                        {{ evaluation.profile_summary }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Missing Keywords -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3"><i class="bi bi-tags"></i> Missing Keywords</h5>
+                    {% if evaluation.missing_keywords and evaluation.missing_keywords|length > 0 %}
+                        <div class="d-flex flex-wrap gap-2">
+                            {% for keyword in evaluation.missing_keywords %}
+                                <span class="badge bg-warning text-dark">{{ keyword }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-success"><i class="bi bi-check-circle"></i> No missing keywords</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Job Stability -->
+            {% if evaluation.job_stability %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3"><i class="bi bi-briefcase"></i> Job Stability</h5>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 text-center">
+                                    <h3 class="text-primary">{{ evaluation.job_stability.AverageJobTenure }}</h3>
+                                    <p class="text-muted">Average Tenure</p>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <h3 class="text-primary">{{ evaluation.job_stability.JobCount }}</h3>
+                                    <p class="text-muted">Total Jobs</p>
+                                </div>
+                                <div class="col-md-4 text-center">
+                                    <h3 class="text-primary">{{ evaluation.job_stability.StabilityScore }}</h3>
+                                    <p class="text-muted">Stability Score</p>
+                                </div>
+                            </div>
+                            {% if evaluation.job_stability.ReasoningExplanation %}
+                            <hr>
+                            <p class="mb-0"><strong>Analysis:</strong> {{ evaluation.job_stability.ReasoningExplanation }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Career Progression -->
+            {% if evaluation.career_progression %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <h5 class="mb-3"><i class="bi bi-graph-up"></i> Career Analysis</h5>
+                    
+                    <!-- Red Flags -->
+                    {% if evaluation.career_progression.red_flags and evaluation.career_progression.red_flags|length > 0 %}
+                    <div class="card mb-3">
+                        <div class="card-header bg-warning text-dark">
+                            <h6 class="mb-0"><i class="bi bi-exclamation-triangle"></i> Red Flags</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                {% for flag in evaluation.career_progression.red_flags %}
+                                    <li>{{ flag }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Reasoning -->
+                    {% if evaluation.career_progression.reasoning %}
+                    <div class="card">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="bi bi-list-check"></i> Analysis Reasoning</h6>
+                        </div>
+                        <div class="card-body">
+                            <ul class="mb-0">
+                                {% if evaluation.career_progression.reasoning is string %}
+                                    <li>{{ evaluation.career_progression.reasoning }}</li>
+                                {% else %}
+                                    {% for reason in evaluation.career_progression.reasoning %}
+                                        <li>{{ reason }}</li>
+                                    {% endfor %}
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+
+            <hr>
+
+            <!-- Interview Questions -->
+            <div class="row">
+                <div class="col-12">
+                    <h5 class="mb-3"><i class="bi bi-chat-left-text"></i> Interview Questions</h5>
+                    
+                    <div class="accordion" id="questionsAccordion">
+                        <!-- Technical Questions -->
+                        {% if evaluation.technical_questions and evaluation.technical_questions|length > 0 %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingTechnical">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTechnical" aria-expanded="true" aria-controls="collapseTechnical">
+                                    <i class="bi bi-code-slash me-2"></i> Technical Questions ({{ evaluation.technical_questions|length }})
+                                </button>
+                            </h2>
+                            <div id="collapseTechnical" class="accordion-collapse collapse show" aria-labelledby="headingTechnical" data-bs-parent="#questionsAccordion">
+                                <div class="accordion-body">
+                                    <ol>
+                                        {% for question in evaluation.technical_questions %}
+                                            <li class="mb-2">{{ question }}</li>
+                                        {% endfor %}
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Non-Technical Questions -->
+                        {% if evaluation.nontechnical_questions and evaluation.nontechnical_questions|length > 0 %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingNonTechnical">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseNonTechnical" aria-expanded="false" aria-controls="collapseNonTechnical">
+                                    <i class="bi bi-person-check me-2"></i> Non-Technical Questions ({{ evaluation.nontechnical_questions|length }})
+                                </button>
+                            </h2>
+                            <div id="collapseNonTechnical" class="accordion-collapse collapse" aria-labelledby="headingNonTechnical" data-bs-parent="#questionsAccordion">
+                                <div class="accordion-body">
+                                    <ol>
+                                        {% for question in evaluation.nontechnical_questions %}
+                                            <li class="mb-2">{{ question }}</li>
+                                        {% endfor %}
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <!-- Behavioral Questions -->
+                        {% if evaluation.behavioral_questions and evaluation.behavioral_questions|length > 0 %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingBehavioral">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBehavioral" aria-expanded="false" aria-controls="collapseBehavioral">
+                                    <i class="bi bi-chat-dots me-2"></i> Behavioral Questions ({{ evaluation.behavioral_questions|length }})
+                                </button>
+                            </h2>
+                            <div id="collapseBehavioral" class="accordion-collapse collapse" aria-labelledby="headingBehavioral" data-bs-parent="#questionsAccordion">
+                                <div class="accordion-body">
+                                    <ol>
+                                        {% for question in evaluation.behavioral_questions %}
+                                            <li class="mb-2">{{ question }}</li>
+                                        {% endfor %}
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

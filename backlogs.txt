@@ -1,0 +1,6 @@
+1) Remove candidate email ID & Mobile number while processing resume
+2) "Download PDF" button for  Resume evaluation also (currently we have for "Recruiter Handbook" only
+3) Average time taken to generate handbook & evaluation to be shown in Dashboard(check if this is already implemented)
+4) Reduce the time under 20 Seconds(Both "resume evaluations" & "Handbook generator"
+5) Restrict only one handbook against one job ID, if handbook present, then show the existing one. Do not let someone create 2 handbook againest 1 job_description
+
